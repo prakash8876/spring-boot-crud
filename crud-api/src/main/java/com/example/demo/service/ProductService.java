@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Product;
+import com.example.demo.exception.ProductNotFoundException;
 import com.example.demo.repo.ProductRepository;
 
 @Service
@@ -30,11 +31,16 @@ public class ProductService {
 	
 	public Product get(Long id) {
 		LOGGER.info("fetching product of id {}", id);
-		return repo.findById(id).get();
+		return repo.findById(id)
+					.orElseThrow(
+							() -> new ProductNotFoundException("Product id " + id + " not found."));
 	}
 	
 	public void delete(Long id) {
-		repo.deleteById(id);
+		Product product = repo.findById(id)
+			.orElseThrow(
+					() -> new ProductNotFoundException("Product id " + id + " not found."));
+		repo.delete(product);
 		LOGGER.info("deleted product of id {}", id);
 	}
 }
